@@ -79,19 +79,31 @@ python manage.py migrate --noinput && python manage.py seed_demo || true && guni
 ## 3. Vercel — React frontend
 
 1. [vercel.com](https://vercel.com) → **Add New Project** → import same GitHub repo
-2. **Root Directory** = `frontend`
-3. **Framework Preset** = Vite (or Other)
+2. **Root Directory** = `frontend` ← important (not repo root)
+3. **Framework Preset** = **Other**
 4. **Build Command:** `npm run build`
-5. **Output Directory:** `dist/client` (if build fails, check `frontend/dist/` after local `npm run build`)
-6. **Environment variable:**
+5. **Output Directory:** `.vercel/output`  
+   (Do **not** use `dist/client` — there is no `index.html`, you get `404: NOT_FOUND`.)
+6. **Environment variable** (Production):
 
 | Name | Value |
 |------|--------|
-| `VITE_API_BASE` | `https://YOUR-RAILWAY-URL/api` |
+| `VITE_API_BASE` | `https://breathe-esg-assignment-production-2051.up.railway.app/api` |
 
-7. Deploy → copy URL, e.g. `https://breathesg.vercel.app`
+7. Deploy → open your `*.vercel.app` URL
 
-8. **Redeploy** frontend after Railway URL is final (if you changed `VITE_API_BASE`).
+### Redeploy on Vercel (after code or env change)
+
+1. Push latest code to GitHub (`frontend/vite.config.ts` has `nitro: { preset: "vercel" }`)
+2. Vercel → your project → **Deployments**
+3. ⋮ on latest → **Redeploy** (or push to `main` auto-deploys)
+4. Confirm **Root Directory** = `frontend` under Settings → General
+5. Settings → Environment Variables → `VITE_API_BASE` → **Redeploy** again if you just added it
+
+### If build fails on Vercel
+
+- Node version **20+** in Project Settings
+- Build logs: `nitro` / `.vercel/output` should appear at end of `npm run build`
 
 ---
 
