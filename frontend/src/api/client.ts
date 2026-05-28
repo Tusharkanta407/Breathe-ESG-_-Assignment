@@ -21,7 +21,14 @@ export async function apiFetch<T>(
     headers.set("Content-Type", "application/json");
   }
 
-  const res = await fetch(`${apiBase}${path}`, { ...options, headers });
+  let res: Response;
+  try {
+    res = await fetch(`${apiBase}${path}`, { ...options, headers });
+  } catch {
+    throw new Error(
+      "Network error — start Django on :8000 or set VITE_API_BASE in frontend/.env and restart npm run dev",
+    );
+  }
   const contentType = res.headers.get("content-type") ?? "";
   if (contentType.includes("text/html")) {
     throw new Error(

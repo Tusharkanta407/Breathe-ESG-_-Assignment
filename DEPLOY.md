@@ -84,13 +84,9 @@ python manage.py migrate --noinput && python manage.py seed_demo || true && guni
 4. **Build Command:** `npm run build:vercel` (in `frontend/vercel.json` — creates `dist/index.html`)
 5. **Output Directory:** `dist`  
    (Do **not** use `dist/client` — no `index.html` → Vercel `404: NOT_FOUND`.)
-6. **Environment variable** (optional — `frontend/vercel.json` proxies `/api/*` to Railway):
+6. **No frontend env var required on Vercel** — the app calls same-origin `/api`; `frontend/vercel.json` rewrites `/api/*` → Railway.
 
-| Name | Value |
-|------|--------|
-| `VITE_API_BASE` | `https://breathe-esg-assignment-production-2051.up.railway.app/api` |
-
-   If unset, the built app uses same-origin `/api` (Vercel rewrite → Railway). If set, the app calls Railway directly (CORS must allow your Vercel domain).
+   Optional **local dev only** (`frontend/.env`): `VITE_API_BASE=https://…up.railway.app/api` so `npm run dev` proxies `/api` to Railway when Django is not running.
 
 7. Deploy → open your `*.vercel.app` URL
 
@@ -100,7 +96,7 @@ python manage.py migrate --noinput && python manage.py seed_demo || true && guni
 2. Vercel → your project → **Deployments**
 3. ⋮ on latest → **Redeploy** (or push to `main` auto-deploys)
 4. Confirm **Root Directory** = `frontend` under Settings → General
-5. Settings → Environment Variables → `VITE_API_BASE` → **Redeploy** again if you just added it
+5. Ensure `frontend/vercel.json` is deployed ( `/api` → Railway rewrite )
 
 ### If build fails on Vercel
 
@@ -111,7 +107,7 @@ python manage.py migrate --noinput && python manage.py seed_demo || true && guni
 
 ## 4. Connect frontend ↔ backend
 
-- Frontend calls `/api/...` (Vercel proxy) or `VITE_API_BASE` + `/activities/`, etc.
+- Frontend always calls same-origin `/api/...` (Vercel rewrite or Vite dev proxy → Railway/local Django).
 - Header should show **Client → Demo Corp** once `GET /api/tenants/` succeeds (same URL you tested on Railway).
 - Railway must be up; Supabase `DATABASE_URL` must be set on Railway.
 - In the live app: header **Client → Demo Corp** (auto-selected after `seed_demo` on Railway build).
@@ -133,6 +129,6 @@ python manage.py migrate --noinput && python manage.py seed_demo || true && guni
 
 | | Local | Production |
 |---|--------|--------------|
-| Frontend | `npm run dev` (proxies `/api` → :8000) | Vercel + `VITE_API_BASE` |
+| Frontend | `npm run dev` (`/api` → :8000 or Railway via `.env`) | Vercel (`vercel.json` `/api` rewrite) |
 | Backend | `python manage.py runserver` | Railway + gunicorn |
 | DB | `backend/.env` `DATABASE_URL` | Railway env `DATABASE_URL` |

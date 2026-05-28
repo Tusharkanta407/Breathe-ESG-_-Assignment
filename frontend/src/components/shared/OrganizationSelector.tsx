@@ -42,8 +42,11 @@ export function OrganizationSelector() {
         : "No tenants — check /api/tenants/ (proxy → Railway or local Django)";
     return (
       <div className="flex max-w-xs flex-col items-end gap-1 text-right">
-        <span className="text-xs text-[var(--color-destructive)]" title={detail}>
-          API unreachable
+        <span
+          className="max-w-[14rem] text-xs text-[var(--color-destructive)]"
+          title={detail}
+        >
+          {detail.length > 48 ? "API unreachable" : detail}
         </span>
         <button
           type="button"
