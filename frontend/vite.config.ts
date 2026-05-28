@@ -6,17 +6,28 @@
 // You can pass additional config via defineConfig({ vite: { ... }, etc... }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
+/** Dev proxy target from frontend/.env (VITE_API_BASE) or local Django. */
+function devProxyTarget(): string {
+  const apiBase = process.env.VITE_API_BASE?.trim();
+  if (!apiBase) return "http://127.0.0.1:8000";
+  try {
+    return new URL(apiBase).origin;
+  } catch {
+    return "http://127.0.0.1:8000";
+  }
+}
+
 export default defineConfig({
   tanstackStart: {
-    // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
     server: { entry: "server" },
   },
   vite: {
     server: {
       proxy: {
         "/api": {
-          target: "http://127.0.0.1:8000",
+          target: devProxyTarget(),
           changeOrigin: true,
+          secure: true,
         },
       },
     },

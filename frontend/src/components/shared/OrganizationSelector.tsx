@@ -9,16 +9,14 @@ const isBrowser = typeof window !== "undefined";
 /** Pick client organization by name — no manual UUID typing. */
 export function OrganizationSelector() {
   const { tenantId, setTenantId } = useTenantStore();
-
-  const apiBase = import.meta.env.VITE_API_BASE?.trim() || "/api";
-
-  const { data: tenants = [], isLoading, isError, error } = useQuery({
-    queryKey: ["tenants", apiBase],
-    queryFn: fetchTenants,
-    staleTime: 60_000,
-    retry: 2,
-    enabled: isBrowser,
-  });
+  const { data: tenants = [], isLoading, isError, isFetched, error, refetch } =
+    useQuery({
+      queryKey: ["tenants"],
+      queryFn: fetchTenants,
+      staleTime: 60_000,
+      retry: 2,
+      enabled: isBrowser,
+    });
 
   useEffect(() => {
     if (!tenants.length) return;
@@ -31,25 +29,35 @@ export function OrganizationSelector() {
 
   if (!isBrowser || isLoading) {
     return (
-      <span className="hidden text-xs text-muted-foreground lg:inline">Loading…</span>
+      <span className="text-xs text-muted-foreground">Loading client…</span>
     );
   }
 
-  if (isError || tenants.length === 0) {
-    const tenantsUrl = `${apiBase.replace(/\/$/, "")}/tenants/`;
-    const hint = error instanceof Error ? error.message : `Open ${tenantsUrl} in a new tab`;
+  const showError = isError || (isFetched && tenants.length === 0);
+
+  if (showError) {
+    const detail =
+      error instanceof Error
+        ? error.message
+        : "No tenants — check /api/tenants/ (proxy → Railway or local Django)";
     return (
-      <span
-        className="hidden max-w-[16rem] truncate text-xs text-[var(--color-destructive)] lg:inline"
-        title={`${tenantsUrl} — ${hint}`}
-      >
-        Cannot reach API — see tooltip
-      </span>
+      <div className="flex max-w-xs flex-col items-end gap-1 text-right">
+        <span className="text-xs text-[var(--color-destructive)]" title={detail}>
+          API unreachable
+        </span>
+        <button
+          type="button"
+          onClick={() => refetch()}
+          className="text-[10px] text-muted-foreground underline hover:text-foreground"
+        >
+          Retry
+        </button>
+      </div>
     );
   }
 
   return (
-    <label className="hidden items-center gap-2 lg:flex">
+    <label className="flex items-center gap-2">
       <span className="text-xs text-muted-foreground">Client</span>
       <select
         value={

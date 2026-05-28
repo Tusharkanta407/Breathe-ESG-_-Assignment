@@ -1,34 +1,31 @@
+import { getApiBase } from "@/lib/api-base";
 import { isValidTenantId } from "@/lib/tenant-id";
 import { useTenantStore } from "../stores/tenantStore";
-
-function resolveApiBase(): string {
-  const raw = (import.meta.env.VITE_API_BASE as string | undefined)?.trim();
-  if (!raw) return "/api";
-  return raw.replace(/\/$/, "");
-}
-
-const API_BASE = resolveApiBase();
 
 export async function apiFetch<T>(
   path: string,
   options: RequestInit = {},
 ): Promise<T> {
+  const apiBase = getApiBase();
   const tenantId = useTenantStore.getState().tenantId;
   const headers = new Headers(options.headers);
   if (isValidTenantId(tenantId)) {
     headers.set("X-Tenant-ID", tenantId.trim());
   }
-  if (!(options.body instanceof FormData) && !headers.has("Content-Type")) {
+  const hasBody = options.body != null && options.body !== "";
+  if (
+    hasBody &&
+    !(options.body instanceof FormData) &&
+    !headers.has("Content-Type")
+  ) {
     headers.set("Content-Type", "application/json");
   }
 
-  const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
+  const res = await fetch(`${apiBase}${path}`, { ...options, headers });
   const contentType = res.headers.get("content-type") ?? "";
   if (contentType.includes("text/html")) {
     throw new Error(
-      API_BASE.startsWith("/")
-        ? "API returned HTML — on Vercel, redeploy after vercel.json /api proxy is in place, or set VITE_API_BASE to your Railway URL + /api"
-        : "API returned HTML instead of JSON — check VITE_API_BASE points to Railway /api",
+      "API returned HTML — start Django locally (port 8000) or redeploy Vercel with /api proxy in vercel.json",
     );
   }
   if (!res.ok) {
