@@ -81,9 +81,11 @@ python manage.py migrate --noinput && python manage.py seed_demo || true && guni
 1. [vercel.com](https://vercel.com) → **Add New Project** → import same GitHub repo
 2. **Root Directory** = `frontend` ← important (not repo root)
 3. **Framework Preset** = **Other**
-4. **Build Command:** `npm run build:vercel` (in `frontend/vercel.json` — creates `dist/index.html`)
+4. **Build Command:** `npm run build:vercel` (**not** `npm run build`)  
+   - `npm run build` = TanStack Start → `dist/client/` + `dist/server/` (wrong for Vercel)  
+   - `npm run build:vercel` = static SPA → `dist/index.html` + `dist/assets/*.css`
 5. **Output Directory:** `dist`  
-   (Do **not** use `dist/client` — no `index.html` → Vercel `404: NOT_FOUND`.)
+   (Do **not** use `dist/client` — no `index.html` → broken deploy / missing CSS.)
 6. **Do not set `VITE_API_BASE` on Vercel** — it makes the browser call Railway directly and triggers CORS errors on `X-Tenant-ID`.  
    The app always uses same-origin `/api`; `vercel.json` proxies to Railway.  
    Test: `https://YOUR-APP.vercel.app/api/tenants/` must return JSON.
@@ -103,7 +105,20 @@ python manage.py migrate --noinput && python manage.py seed_demo || true && guni
 ### If build fails on Vercel
 
 - Node version **20+** in Project Settings
-- Build logs should end with `vite build --config vite.vercel.config.ts` and `dist/index.html`
+- Build logs should end with `vite build --config vite.vercel.config.ts` and:
+  - `dist/index.html`
+  - `dist/assets/index-*.js` and **one** main `styles-*.css` (not `dist/client/`)
+
+### Lovable / Nitro messages locally
+
+`No Lovable context detected — skipping nitro deploy plugin` is **harmless** when running `npm run dev` or `npm run build`. Ignore it for Vercel; use `build:vercel` only.
+
+### If prod CSS looks broken (sidebar misaligned, no Tailwind)
+
+1. Vercel **Build Command** must be `npm run build:vercel`
+2. **Output Directory** = `dist` (not `dist/client`)
+3. Redeploy; hard-refresh browser (Ctrl+Shift+R)
+4. Local check: `cd frontend && npm run build:vercel && npm run preview:vercel`
 
 ### If live app shows “API unreachable” (local works, prod does not)
 

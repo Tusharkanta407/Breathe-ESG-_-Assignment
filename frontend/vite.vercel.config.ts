@@ -1,6 +1,6 @@
 /**
- * Static SPA build for Vercel (produces dist/index.html).
- * Local dev still uses vite.config.ts (TanStack Start).
+ * Static SPA build for Vercel (produces dist/index.html + assets).
+ * Do NOT use `npm run build` for Vercel — that is TanStack Start (dist/client, no index.html).
  */
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
@@ -12,5 +12,6 @@ export default defineConfig({
   build: {
     outDir: "dist",
     emptyOutDir: true,
+    cssCodeSplit: false,
   },
 });

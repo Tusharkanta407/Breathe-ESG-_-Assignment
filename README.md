@@ -4,8 +4,8 @@ Enterprise ESG data prototype: ingest SAP, utility, and travel data → normaliz
 
 ## Live demo
 
-- **App:** _(add your Vercel URL after deploy)_
-- **API:** _(add your Railway URL)_ `/api/docs/`
+- **App:** https://breathe-esg-assignment-eosin.vercel.app/
+- **API docs:** https://breathe-esg-assignment-production-2051.up.railway.app/api/docs/
 
 ## Documentation (assignment deliverables)
 
