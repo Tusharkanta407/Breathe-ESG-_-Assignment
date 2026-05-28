@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 
 import environ
+from corsheaders.defaults import default_headers
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
@@ -114,6 +115,12 @@ SPECTACULAR_SETTINGS = {
 CORS_ALLOWED_ORIGINS = env.list(
     "CORS_ALLOWED_ORIGINS",
     default=["http://localhost:5173"],
+)
+
+# Required when the browser calls Railway directly (e.g. Vercel with VITE_API_BASE).
+CORS_ALLOW_HEADERS = (
+    *default_headers,
+    "x-tenant-id",
 )
 
 TENANT_HEADER = "X-Tenant-ID"

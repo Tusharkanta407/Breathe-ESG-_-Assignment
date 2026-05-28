@@ -1,12 +1,12 @@
-import { getApiBase, getApiBaseFallback } from "@/lib/api-base";
+import { getApiBase } from "@/lib/api-base";
 import { isValidTenantId } from "@/lib/tenant-id";
 import { useTenantStore } from "../stores/tenantStore";
 
-async function request<T>(
-  apiBase: string,
+export async function apiFetch<T>(
   path: string,
-  options: RequestInit,
-): Promise<Response> {
+  options: RequestInit = {},
+): Promise<T> {
+  const apiBase = getApiBase();
   const tenantId = useTenantStore.getState().tenantId;
   const headers = new Headers(options.headers);
   if (isValidTenantId(tenantId)) {
@@ -20,35 +20,20 @@ async function request<T>(
   ) {
     headers.set("Content-Type", "application/json");
   }
-  return fetch(`${apiBase}${path}`, { ...options, headers });
-}
 
-export async function apiFetch<T>(
-  path: string,
-  options: RequestInit = {},
-): Promise<T> {
-  let apiBase = getApiBase();
   let res: Response;
-
   try {
-    res = await request(apiBase, path, options);
+    res = await fetch(`${apiBase}${path}`, { ...options, headers });
   } catch {
     throw new Error(
       "Network error — check Railway is up or run Django locally on port 8000",
     );
   }
 
-  let contentType = res.headers.get("content-type") ?? "";
-  const fallback = getApiBaseFallback();
-  if (contentType.includes("text/html") && fallback) {
-    apiBase = fallback;
-    res = await request(apiBase, path, options);
-    contentType = res.headers.get("content-type") ?? "";
-  }
-
+  const contentType = res.headers.get("content-type") ?? "";
   if (contentType.includes("text/html")) {
     throw new Error(
-      "API returned HTML — set VITE_API_BASE on Vercel to your Railway URL + /api, then redeploy",
+      "API returned HTML — use /api on same host; redeploy Vercel with vercel.json /api rewrite",
     );
   }
 

@@ -84,16 +84,11 @@ python manage.py migrate --noinput && python manage.py seed_demo || true && guni
 4. **Build Command:** `npm run build:vercel` (in `frontend/vercel.json` — creates `dist/index.html`)
 5. **Output Directory:** `dist`  
    (Do **not** use `dist/client` — no `index.html` → Vercel `404: NOT_FOUND`.)
-6. **Environment variable (Production — required if `/api` rewrite fails):**
+6. **Do not set `VITE_API_BASE` on Vercel** — it makes the browser call Railway directly and triggers CORS errors on `X-Tenant-ID`.  
+   The app always uses same-origin `/api`; `vercel.json` proxies to Railway.  
+   Test: `https://YOUR-APP.vercel.app/api/tenants/` must return JSON.
 
-| Name | Value |
-|------|--------|
-| `VITE_API_BASE` | `https://breathe-esg-assignment-production-2051.up.railway.app/api` |
-
-   Then **Redeploy**. The built app calls Railway directly on `*.vercel.app` (CORS is open on Railway).  
-   `frontend/vercel.json` also tries to proxy `/api` → Railway; test with `/api/tenants/` (must return JSON, not HTML).
-
-   **Local dev only:** same variable in `frontend/.env` (Vite proxy target; browser still uses `/api`).
+   **Local dev only:** `VITE_API_BASE` in `frontend/.env` (Vite proxy target only; browser still uses `/api`).
 
 7. Deploy → open your `*.vercel.app` URL
 
@@ -128,7 +123,7 @@ Railway is fine; the browser on Vercel must hit **same-origin** `/api/...`, whic
 
 4. **Redeploy** after changing settings (Deployments → ⋮ → Redeploy).
 
-5. **Do not rely on `VITE_API_BASE` on Vercel** for the live app — the client always calls `/api`. That variable is only for local dev proxy in `frontend/.env`.
+5. **Remove `VITE_API_BASE` from Vercel** if present — it causes CORS failures. Redeploy after removing.
 
 ---
 
