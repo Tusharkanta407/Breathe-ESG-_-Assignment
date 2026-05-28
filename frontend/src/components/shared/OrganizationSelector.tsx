@@ -8,10 +8,13 @@ import { useTenantStore } from "@/stores/tenantStore";
 export function OrganizationSelector() {
   const { tenantId, setTenantId } = useTenantStore();
 
-  const { data: tenants = [], isLoading, isError } = useQuery({
-    queryKey: ["tenants"],
+  const apiBase = import.meta.env.VITE_API_BASE?.trim() || "";
+
+  const { data: tenants = [], isLoading, isError, error } = useQuery({
+    queryKey: ["tenants", apiBase],
     queryFn: fetchTenants,
     staleTime: 60_000,
+    retry: 2,
   });
 
   useEffect(() => {
@@ -30,12 +33,15 @@ export function OrganizationSelector() {
   }
 
   if (isError || tenants.length === 0) {
+    const hint = apiBase
+      ? `API: ${apiBase}/tenants/ — ${error instanceof Error ? error.message : "open this URL in a new tab"}`
+      : "Set VITE_API_BASE on Vercel to Railway URL + /api, then redeploy";
     return (
       <span
-        className="hidden max-w-[12rem] truncate text-xs text-[var(--color-destructive)] lg:inline"
-        title="Start backend and run: python manage.py seed_demo"
+        className="hidden max-w-[16rem] truncate text-xs text-[var(--color-destructive)] lg:inline"
+        title={hint}
       >
-        No organization — start backend
+        {!apiBase ? "API not configured" : "Cannot reach API — see tooltip"}
       </span>
     );
   }

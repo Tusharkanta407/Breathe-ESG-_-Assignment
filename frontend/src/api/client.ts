@@ -1,7 +1,13 @@
 import { isValidTenantId } from "@/lib/tenant-id";
 import { useTenantStore } from "../stores/tenantStore";
 
-const API_BASE = import.meta.env.VITE_API_BASE || "/api";
+function resolveApiBase(): string {
+  const raw = (import.meta.env.VITE_API_BASE as string | undefined)?.trim();
+  if (!raw) return "/api";
+  return raw.replace(/\/$/, "");
+}
+
+const API_BASE = resolveApiBase();
 
 export async function apiFetch<T>(
   path: string,
