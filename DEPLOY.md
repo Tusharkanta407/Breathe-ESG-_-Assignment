@@ -84,9 +84,16 @@ python manage.py migrate --noinput && python manage.py seed_demo || true && guni
 4. **Build Command:** `npm run build:vercel` (in `frontend/vercel.json` — creates `dist/index.html`)
 5. **Output Directory:** `dist`  
    (Do **not** use `dist/client` — no `index.html` → Vercel `404: NOT_FOUND`.)
-6. **No frontend env var required on Vercel** — the app calls same-origin `/api`; `frontend/vercel.json` rewrites `/api/*` → Railway.
+6. **Environment variable (Production — required if `/api` rewrite fails):**
 
-   Optional **local dev only** (`frontend/.env`): `VITE_API_BASE=https://…up.railway.app/api` so `npm run dev` proxies `/api` to Railway when Django is not running.
+| Name | Value |
+|------|--------|
+| `VITE_API_BASE` | `https://breathe-esg-assignment-production-2051.up.railway.app/api` |
+
+   Then **Redeploy**. The built app calls Railway directly on `*.vercel.app` (CORS is open on Railway).  
+   `frontend/vercel.json` also tries to proxy `/api` → Railway; test with `/api/tenants/` (must return JSON, not HTML).
+
+   **Local dev only:** same variable in `frontend/.env` (Vite proxy target; browser still uses `/api`).
 
 7. Deploy → open your `*.vercel.app` URL
 
@@ -101,7 +108,27 @@ python manage.py migrate --noinput && python manage.py seed_demo || true && guni
 ### If build fails on Vercel
 
 - Node version **20+** in Project Settings
-- Build logs: `nitro` / `.vercel/output` should appear at end of `npm run build`
+- Build logs should end with `vite build --config vite.vercel.config.ts` and `dist/index.html`
+
+### If live app shows “API unreachable” (local works, prod does not)
+
+Railway is fine; the browser on Vercel must hit **same-origin** `/api/...`, which Vercel forwards to Railway.
+
+1. **Check proxy:** open `https://YOUR-APP.vercel.app/api/tenants/` in a new tab  
+   - **JSON** (Demo Corp) → API routing is OK; hard-refresh the app (Ctrl+Shift+R)  
+   - **HTML** or the app homepage → `/api` rewrite is missing (see below)
+
+2. **Root Directory** (Settings → General)  
+   - `frontend` → uses `frontend/vercel.json`  
+   - repo root `.` → uses root `vercel.json` (also in this repo)
+
+3. **Build settings** must match (Settings → Build & Development):  
+   - Build Command: `npm run build:vercel` (not `npm run build`)  
+   - Output Directory: `dist` (if root is `frontend`) or `frontend/dist` (if root is repo)
+
+4. **Redeploy** after changing settings (Deployments → ⋮ → Redeploy).
+
+5. **Do not rely on `VITE_API_BASE` on Vercel** for the live app — the client always calls `/api`. That variable is only for local dev proxy in `frontend/.env`.
 
 ---
 
