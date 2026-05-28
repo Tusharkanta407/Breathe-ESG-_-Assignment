@@ -81,9 +81,9 @@ python manage.py migrate --noinput && python manage.py seed_demo || true && guni
 1. [vercel.com](https://vercel.com) → **Add New Project** → import same GitHub repo
 2. **Root Directory** = `frontend` ← important (not repo root)
 3. **Framework Preset** = **Other**
-4. **Build Command:** `npm run build`
-5. **Output Directory:** `.vercel/output`  
-   (Do **not** use `dist/client` — there is no `index.html`, you get `404: NOT_FOUND`.)
+4. **Build Command:** `npm run build:vercel` (in `frontend/vercel.json` — creates `dist/index.html`)
+5. **Output Directory:** `dist`  
+   (Do **not** use `dist/client` — no `index.html` → Vercel `404: NOT_FOUND`.)
 6. **Environment variable** (Production):
 
 | Name | Value |
