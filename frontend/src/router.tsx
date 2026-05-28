@@ -2,8 +2,12 @@ import { QueryClient } from "@tanstack/react-query";
 import { createRouter } from "@tanstack/react-router";
 import { routeTree } from "./routeTree.gen";
 
-export const getRouter = () => {
-  const queryClient = new QueryClient();
+export function createAppRouter() {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: { retry: 2 },
+    },
+  });
 
   const router = createRouter({
     routeTree,
@@ -12,5 +16,8 @@ export const getRouter = () => {
     defaultPreloadStaleTime: 0,
   });
 
-  return router;
-};
+  return { router, queryClient };
+}
+
+/** @deprecated Use createAppRouter — kept for TanStack Start dev entrypoints */
+export const getRouter = () => createAppRouter().router;

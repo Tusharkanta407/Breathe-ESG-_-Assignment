@@ -1,12 +1,12 @@
-import { getApiBase } from "@/lib/api-base";
+import { getApiBase, getApiBaseFallback } from "@/lib/api-base";
 import { isValidTenantId } from "@/lib/tenant-id";
 import { useTenantStore } from "../stores/tenantStore";
 
-export async function apiFetch<T>(
+async function request<T>(
+  apiBase: string,
   path: string,
-  options: RequestInit = {},
-): Promise<T> {
-  const apiBase = getApiBase();
+  options: RequestInit,
+): Promise<Response> {
   const tenantId = useTenantStore.getState().tenantId;
   const headers = new Headers(options.headers);
   if (isValidTenantId(tenantId)) {
@@ -20,21 +20,38 @@ export async function apiFetch<T>(
   ) {
     headers.set("Content-Type", "application/json");
   }
+  return fetch(`${apiBase}${path}`, { ...options, headers });
+}
 
+export async function apiFetch<T>(
+  path: string,
+  options: RequestInit = {},
+): Promise<T> {
+  let apiBase = getApiBase();
   let res: Response;
+
   try {
-    res = await fetch(`${apiBase}${path}`, { ...options, headers });
+    res = await request(apiBase, path, options);
   } catch {
     throw new Error(
-      "Network error — start Django on :8000 or set VITE_API_BASE in frontend/.env and restart npm run dev",
+      "Network error — check Railway is up or run Django locally on port 8000",
     );
   }
-  const contentType = res.headers.get("content-type") ?? "";
+
+  let contentType = res.headers.get("content-type") ?? "";
+  const fallback = getApiBaseFallback();
+  if (contentType.includes("text/html") && fallback) {
+    apiBase = fallback;
+    res = await request(apiBase, path, options);
+    contentType = res.headers.get("content-type") ?? "";
+  }
+
   if (contentType.includes("text/html")) {
     throw new Error(
-      "API returned HTML — start Django locally (port 8000) or redeploy Vercel with /api proxy in vercel.json",
+      "API returned HTML — set VITE_API_BASE on Vercel to your Railway URL + /api, then redeploy",
     );
   }
+
   if (!res.ok) {
     const body = await res.text();
     let detail = res.statusText;
@@ -43,7 +60,10 @@ export async function apiFetch<T>(
       if (typeof err.detail === "string") {
         detail = err.detail;
       } else if (Array.isArray(err.detail)) {
-        detail = err.detail.map((d) => (typeof d === "string" ? d : d.msg ?? "")).filter(Boolean).join(", ");
+        detail = err.detail
+          .map((d) => (typeof d === "string" ? d : d.msg ?? ""))
+          .filter(Boolean)
+          .join(", ");
       }
     } catch {
       if (body && !body.trimStart().startsWith("<")) {
@@ -52,5 +72,6 @@ export async function apiFetch<T>(
     }
     throw new Error(detail || "Request failed");
   }
+
   return res.json() as Promise<T>;
 }
