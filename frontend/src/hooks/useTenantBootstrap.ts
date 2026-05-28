@@ -7,7 +7,7 @@ export function useTenantBootstrap() {
   const { tenantId, setTenantId } = useTenantStore();
 
   useEffect(() => {
-    if (tenantId) return;
+    if (typeof window === "undefined" || tenantId) return;
     fetchTenants()
       .then((tenants) => {
         const active = tenants.find((t) => t.is_active);

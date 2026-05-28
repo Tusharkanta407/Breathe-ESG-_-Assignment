@@ -4,17 +4,20 @@ import { fetchTenants } from "@/api/tenants";
 import { isValidTenantId } from "@/lib/tenant-id";
 import { useTenantStore } from "@/stores/tenantStore";
 
+const isBrowser = typeof window !== "undefined";
+
 /** Pick client organization by name — no manual UUID typing. */
 export function OrganizationSelector() {
   const { tenantId, setTenantId } = useTenantStore();
 
-  const apiBase = import.meta.env.VITE_API_BASE?.trim() || "";
+  const apiBase = import.meta.env.VITE_API_BASE?.trim() || "/api";
 
   const { data: tenants = [], isLoading, isError, error } = useQuery({
     queryKey: ["tenants", apiBase],
     queryFn: fetchTenants,
     staleTime: 60_000,
     retry: 2,
+    enabled: isBrowser,
   });
 
   useEffect(() => {
@@ -26,22 +29,21 @@ export function OrganizationSelector() {
     }
   }, [tenants, tenantId, setTenantId]);
 
-  if (isLoading) {
+  if (!isBrowser || isLoading) {
     return (
       <span className="hidden text-xs text-muted-foreground lg:inline">Loading…</span>
     );
   }
 
   if (isError || tenants.length === 0) {
-    const hint = apiBase
-      ? `API: ${apiBase}/tenants/ — ${error instanceof Error ? error.message : "open this URL in a new tab"}`
-      : "Set VITE_API_BASE on Vercel to Railway URL + /api, then redeploy";
+    const tenantsUrl = `${apiBase.replace(/\/$/, "")}/tenants/`;
+    const hint = error instanceof Error ? error.message : `Open ${tenantsUrl} in a new tab`;
     return (
       <span
         className="hidden max-w-[16rem] truncate text-xs text-[var(--color-destructive)] lg:inline"
-        title={hint}
+        title={`${tenantsUrl} — ${hint}`}
       >
-        {!apiBase ? "API not configured" : "Cannot reach API — see tooltip"}
+        Cannot reach API — see tooltip
       </span>
     );
   }

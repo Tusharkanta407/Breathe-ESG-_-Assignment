@@ -23,6 +23,14 @@ export async function apiFetch<T>(
   }
 
   const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
+  const contentType = res.headers.get("content-type") ?? "";
+  if (contentType.includes("text/html")) {
+    throw new Error(
+      API_BASE.startsWith("/")
+        ? "API returned HTML — on Vercel, redeploy after vercel.json /api proxy is in place, or set VITE_API_BASE to your Railway URL + /api"
+        : "API returned HTML instead of JSON — check VITE_API_BASE points to Railway /api",
+    );
+  }
   if (!res.ok) {
     const body = await res.text();
     let detail = res.statusText;

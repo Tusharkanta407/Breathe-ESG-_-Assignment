@@ -84,11 +84,13 @@ python manage.py migrate --noinput && python manage.py seed_demo || true && guni
 4. **Build Command:** `npm run build:vercel` (in `frontend/vercel.json` — creates `dist/index.html`)
 5. **Output Directory:** `dist`  
    (Do **not** use `dist/client` — no `index.html` → Vercel `404: NOT_FOUND`.)
-6. **Environment variable** (Production):
+6. **Environment variable** (optional — `frontend/vercel.json` proxies `/api/*` to Railway):
 
 | Name | Value |
 |------|--------|
 | `VITE_API_BASE` | `https://breathe-esg-assignment-production-2051.up.railway.app/api` |
+
+   If unset, the built app uses same-origin `/api` (Vercel rewrite → Railway). If set, the app calls Railway directly (CORS must allow your Vercel domain).
 
 7. Deploy → open your `*.vercel.app` URL
 
@@ -109,7 +111,8 @@ python manage.py migrate --noinput && python manage.py seed_demo || true && guni
 
 ## 4. Connect frontend ↔ backend
 
-- Frontend calls `VITE_API_BASE` + `/activities/`, etc.
+- Frontend calls `/api/...` (Vercel proxy) or `VITE_API_BASE` + `/activities/`, etc.
+- Header should show **Client → Demo Corp** once `GET /api/tenants/` succeeds (same URL you tested on Railway).
 - Railway must be up; Supabase `DATABASE_URL` must be set on Railway.
 - In the live app: header **Client → Demo Corp** (auto-selected after `seed_demo` on Railway build).
 
