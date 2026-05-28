@@ -1,0 +1,4 @@
+document_number,plant_code,quantity,unit,posting_date,fuel_type,cost_center
+PO-1001,PLT01,120,L,2026-05-01,diesel,CC-440
+PO-1002,Werk,85,gal,15.05.2026,,Kostenstelle-12
+PO-1003,PLT01,2.5,t,2026-05-10,coal,

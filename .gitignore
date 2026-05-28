@@ -1,0 +1,40 @@
+# Secrets — never commit
+backend/.env
+frontend/.env
+.env
+.env.*
+!.env.example
+
+# Python
+backend/.venv/
+backend/venv312/
+backend/__pycache__/
+backend/**/__pycache__/
+*.pyc
+backend/db.sqlite3
+backend/staticfiles/
+backend/media/
+
+# Node
+frontend/node_modules/
+frontend/dist/
+frontend/.output/
+frontend/.nitro/
+frontend/.tanstack/
+
+# IDE / OS
+.cursor/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Internal only (keep locally if needed)
+task.md
+SUBMISSION.md
+RECRUITER_TEST.md
+STATUS.md
+
+# Logs
+*.log
+npm-debug.log*

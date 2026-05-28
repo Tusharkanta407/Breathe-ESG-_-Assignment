@@ -1,0 +1,24 @@
+[
+  {
+    "uuid": "bk-001",
+    "booking_type": "flight",
+    "segments": [
+      {
+        "origin_iata": "DEL",
+        "destination_iata": "BOM",
+        "departure_ts": "2026-05-12T09:00:00Z",
+        "distance_km": 1150
+      }
+    ]
+  },
+  {
+    "uuid": "bk-002",
+    "booking_type": "hotel",
+    "payload": {
+      "property_name": "Frankfurt Central",
+      "checkin_date": "2026-05-15",
+      "checkout_date": "2026-05-17",
+      "nights": 2
+    }
+  }
+]

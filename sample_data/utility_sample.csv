@@ -1,0 +1,3 @@
+meter_id,interval_start,reading_value,reading_unit,billing_period_start,billing_period_end
+MTR-9001,2026-05-01T00:00:00,1450.5,kWh,2026-05-01,2026-05-31
+MTR-9001,2026-05-02T00:00:00,1520.0,kWh,2026-05-01,2026-05-31
