@@ -43,11 +43,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <div className="flex h-16 items-center border-b border-sidebar-border px-4">
           <BrandLogo size="md" showWordmark linkToHome />
         </div>
-        <nav className="flex-1 px-2 py-3">
-          <div className="px-2 pb-1.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+        <nav className="flex-1 px-3 py-3">
+          <div className="pb-2 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
             Workflow
           </div>
-          <ul className="space-y-0.5">
+          <ul className="m-0 list-none space-y-0.5 p-0">
             {nav.map((item) => {
               const Icon = item.icon;
               const active = location.pathname === item.to;
