@@ -31,17 +31,21 @@ Example host for your project:
 db.zhpwvunkqkrchsndkurl.supabase.co
 ```
 
-**Session pooler (recommended for apps):**
+**Session pooler (recommended — use on Railway/Vercel):**
+
+Supabase Dashboard → Database → **Session pooler** URI (port **5432** on `*.pooler.supabase.com`).
 
 ```text
-postgresql://postgres.zhpwvunkqkrchsndkurl:[PASSWORD]@aws-0-ap-south-1.pooler.supabase.com:6543/postgres
+postgresql://postgres.PROJECT_REF:[PASSWORD]@aws-0-REGION.pooler.supabase.com:5432/postgres
 ```
 
-**Direct connection:**
+**Direct connection (local dev OK; Railway build often fails — IPv6):**
 
 ```text
 postgresql://postgres:[PASSWORD]@db.zhpwvunkqkrchsndkurl.supabase.co:5432/postgres
 ```
+
+If deploy logs show `2406:da18:... Network is unreachable`, switch to the **pooler** URI above.
 
 ---
 

@@ -37,18 +37,38 @@ Share repo with: saurav@breatheesg.com, rahul@breatheesg.com, shivang@breatheesg
 | `SECRET_KEY` | long random string |
 | `DATABASE_URL` | Supabase Postgres URI (`@` in password → `%40`) |
 | `ALLOWED_HOSTS` | `*` (or your Railway domain) |
-| `CORS_ALLOW_ALL_ORIGINS` | `true` (demo) |
+| `CORS_ALLOW_ALL_ORIGINS` | `true` (demo — **do not** set `CORS_ALLOWED_ORIGINS=true`) |
+| `CORS_ALLOWED_ORIGINS` | leave empty, or your Vercel URL e.g. `https://yourapp.vercel.app` |
 
-4. **Deploy settings** (Settings → Deploy):
+4. **DATABASE_URL — use Supabase pooler (required on Railway)**
 
-**Build command:**
-```bash
-pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate --noinput && python manage.py seed_demo
+Direct host `db.xxx.supabase.co` often resolves to **IPv6**. Railway cannot reach it → `Network is unreachable`.
+
+In Supabase: **Project Settings → Database → Connection string → URI → Session pooler** (not “Direct”).
+
+Example shape (your region/host will differ):
+
+```text
+postgresql://postgres.PROJECT_REF:PASSWORD@aws-0-REGION.pooler.supabase.com:5432/postgres
 ```
 
-**Start command:**
+Password: URL-encode `@` as `%40`.
+
+5. **Deploy settings** (Settings → Deploy):
+
+**Build command** (no DB access during build):
 ```bash
-gunicorn config.wsgi:application --bind 0.0.0.0:$PORT
+pip install -r requirements.txt && python manage.py collectstatic --noinput
+```
+
+**Start command** (migrate + seed when container runs — DB reachable here):
+```bash
+sh start.sh
+```
+
+Or manually:
+```bash
+python manage.py migrate --noinput && python manage.py seed_demo || true && gunicorn config.wsgi:application --bind 0.0.0.0:$PORT
 ```
 
 5. Copy public URL, e.g. `https://breathesg-api-production.up.railway.app`
